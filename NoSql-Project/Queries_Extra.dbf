@@ -1,0 +1,40 @@
+
+
+db.getCollection('movies').find({ "Title" :"The Dark Knight"}),
+//lessthanequalto
+db.getCollection('movies').find( { Age: { $lte:  "13+" }   } )
+db.getCollection('movies').find( { IMDb: { $gte:  "9" }   } )
+
+//Movies inbetween particular years
+db.movies.find({
+    Year: {
+        $gte:"2018",
+        $lt: "2019"
+    }
+})
+
+//andOperation for movies with particular IMDb rating in particular year
+db.getCollection('movies').find({ $and: [ { "IMDb": { $gte:  "8.8" }}, {  "Year": "2010"} ] })
+
+
+    
+//2 )group number of movies done by all directors
+db.movies.aggregate([{$group : {_id : "$Directors", MoviesDirected : {$sum : 1}}}])
+
+
+
++//updating dataset with one extra column ( avg of IMDb and Rotten Tomatoes ratings)
+db.movies.find().forEach(
+  function(res){
+    movie_id = res.Title;
+    com_id = res._id;
+    com_imdb=parseInt(res.IMDb);
+    com_rt= res.RottenTomatoes.split("%")[0]/10;
+    com_avearge= ( com_imdb+com_rt)/2;
+          movie_info = db.movies.findOne({_id:com_id});
+
+
+    db.movies.update({_id:com_id}, {$set:{"average":com_avearge}});
+ 
+  }
+)
